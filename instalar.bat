@@ -102,6 +102,16 @@ echo -------------------------------------------------------------
 if not exist "%~dp0media" mkdir "%~dp0media"
 if not exist "%~dp0salidas" mkdir "%~dp0salidas"
 echo Listo. Las carpetas estan preparadas para recibir contenido.
+echo.
+echo 1.0.0 > "%~dp0version.txt"
+echo [OK] Archivo de version.txt creado con version: 1.0.0
+echo.
+:: Crear archivo base aunque no se ingrese token
+if not exist configuracion.txt (
+	echo [OK] Archivo de configuracion para el token de Huggingface creado
+    echo HUGGINGFACE_TOKEN=>"%~dp0configuracion.txt"
+	echo.
+)
 goto :EOF
 
 :INSTALAR_DEPENDENCIAS_VENV
@@ -166,6 +176,7 @@ goto :EOF
 
 :INSTALAR_MODOS
 cls
+color 0A
 echo Instalando modos de transcripcion...
 echo Modos 1, 2 y 3 habilitados correctamente.
 goto :EOF
@@ -176,11 +187,6 @@ cls
 echo -------------------------------------------------------------
 echo CONFIGURACIÓN DEL TOKEN PARA MODO PRO (Hugging Face)
 echo -------------------------------------------------------------
-
-:: Crear archivo base aunque no se ingrese token
-if not exist configuracion.txt (
-    echo HUGGINGFACE_TOKEN=>configuracion.txt
-)
 
 set /p QUIERE_TOKEN=¿Deseas ingresar tu token de Hugging Face ahora? [S/N] (Enter=No): 
 
@@ -194,8 +200,11 @@ if /i "%QUIERE_TOKEN%"=="S" (
 
 goto :EOF
 
-
 :CIERRE
+
+:: ==========================================================
+:: CREAR O ACTUALIZAR ARCHIVO DE VERSION LOCAL
+:: ==========================================================
 cls
 echo =============================================================
 echo INSTALACION COMPLETADA CON EXITO
