@@ -26,7 +26,7 @@ Funciona completamente offline, protege tu privacidad y te permite convertir ide
 
 1. Descarga este repositorio
 2. Ejecuta `instalar.bat` → Instala todo de forma automática
-3. Coloca un archivo en `transcribir/media/`
+3. Coloca un archivo en `media/`
 4. Ejecuta `transcribir.bat` → Elige el modo y listo
 
 > El sistema instalará todos los modos (básico, pausas, PRO) por defecto.
