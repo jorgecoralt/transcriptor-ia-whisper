@@ -90,7 +90,7 @@ Desarrollado por [Jorge Coral](https://jorgecoral.com)
 
 ## 🎯 ¿Listo para usarlo?
 
-Coloca tu archivo en `transcribir/media/`, ejecuta `transcribir.bat` y deja que la claridad haga su trabajo.
+Coloca tu archivo en `media/`, ejecuta `transcribir.bat` y deja que la claridad haga su trabajo.
 
 Cada vez que ejecutes una transcripción, se abrirá la web oficial con más recursos y ejemplos.
 
