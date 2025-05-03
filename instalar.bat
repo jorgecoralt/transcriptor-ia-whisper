@@ -173,8 +173,17 @@ goto :EOF
 
 :CONFIGURAR_TOKEN
 cls
-echo Configuracion del Token para modo PRO...
+echo -------------------------------------------------------------
+echo CONFIGURACIÓN DEL TOKEN PARA MODO PRO (Hugging Face)
+echo -------------------------------------------------------------
+
+:: Crear archivo base aunque no se ingrese token
+if not exist configuracion.txt (
+    echo HUGGINGFACE_TOKEN=>configuracion.txt
+)
+
 set /p QUIERE_TOKEN=¿Deseas ingresar tu token de Hugging Face ahora? [S/N] (Enter=No): 
+
 if /i "%QUIERE_TOKEN%"=="S" (
     set /p TOKEN=Ingresa tu token:
     echo HUGGINGFACE_TOKEN=%TOKEN%>configuracion.txt
@@ -182,7 +191,9 @@ if /i "%QUIERE_TOKEN%"=="S" (
 ) else (
     echo Puedes agregar tu token luego en el archivo: configuracion.txt
 )
+
 goto :EOF
+
 
 :CIERRE
 cls
