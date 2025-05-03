@@ -1,0 +1,21 @@
+# Python
+__pycache__/
+*.pyc
+
+# Archivos temporales
+*.log
+.DS_Store
+
+# Configuración personal
+configuracion.txt
+modos_instalados.txt
+
+# Archivos de usuario
+transcribir/media/
+salidas/
+salidas_pausas/
+salidas_pro/
+
+# Entornos virtuales (por si los usas)
+env/
+.venv/
