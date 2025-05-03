@@ -1,4 +1,4 @@
-# 📝 Transcriptor IA Local
+# 📝 Transcriptor IA - Wishper
 
 Convierte tus audios o videos en texto estructurado usando modelos de inteligencia artificial como **Whisper** y **WhisperX**, directamente desde tu computador y sin conexión a internet.
 
