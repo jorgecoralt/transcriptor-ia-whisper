@@ -40,6 +40,8 @@ call :PREPARAR_CARPETAS
 pause
 call :INSTALAR_DEPENDENCIAS_VENV
 pause
+call :INSTALAR_FFMPEG
+pause
 call :DETECTAR_GPU
 pause
 call :INSTALAR_MODOS
@@ -107,7 +109,7 @@ echo 1.0.0 > "%~dp0version.txt"
 echo [OK] Archivo de version.txt creado con version: 1.0.0
 echo.
 :: Crear archivo base aunque no se ingrese token
-if not exist configuracion.txt (
+if not exist "%~dp0configuracion.txt" (
 	echo [OK] Archivo de configuracion para el token de Huggingface creado
     echo HUGGINGFACE_TOKEN=>"%~dp0configuracion.txt"
 	echo.
@@ -144,14 +146,23 @@ echo [+] Instalando Whisper y WhisperX...
 python -m pip install openai-whisper==20230918
 :: Instalar WhisperX sin dependencias para no romper torch
 python -m pip install whisperx==3.3.4 --no-deps
-
 :: Dependencias auxiliares
-python -m pip install pydub==0.25.1 ffmpeg-python==0.2.0
+python -m pip install pydub==0.25.1 ffmpeg-python==0.2.0 pandas==2.1.4
 
 
+echo.
 echo -------------------------------------------------------------
-echo NOTA: Se instalan versiones específicas para compatibilidad
+echo NOTA: Se instalan versiones especificas para compatibilidad
 echo total con CUDA 11.8 y evitar conflictos con PyTorch.
+echo -------------------------------------------------------------
+echo -------------------------------------------------------------
+echo NOTA: Algunas advertencias pueden aparecer al instalar pandas
+echo debido a dependencias opcionales de WhisperX.
+echo.
+echo Algo como:
+echo "ERROR: pip's dependency resolver does not currently take into account all the packages that are installed."
+echo.
+echo Estas pueden ignorarse. El sistema sigue funcionando bien.
 echo -------------------------------------------------------------
 
 if %errorlevel% neq 0 (
@@ -161,7 +172,63 @@ if %errorlevel% neq 0 (
 )
 
 echo [OK] Dependencias instaladas correctamente.
+
 goto :EOF
+
+:INSTALAR_FFMPEG
+cls
+echo =============================================================
+echo INSTALANDO FFMPEG (Requerido por Whisper para audio/video)
+echo =============================================================
+
+:: Verificar si ya está disponible
+where ffmpeg >nul 2>&1
+if %errorlevel%==0 (
+    echo [+] FFmpeg ya está disponible en el sistema.
+    goto :EOF
+)
+
+:: Definir rutas
+set "FFMPEG_DIR=%~dp0ffmpeg"
+set "FFMPEG_ZIP=ffmpeg.zip"
+set "FFMPEG_URL=https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
+
+:: Descargar el ZIP de FFmpeg
+echo [+] Descargando FFmpeg...
+powershell -Command "Invoke-WebRequest -Uri '%FFMPEG_URL%' -OutFile '%FFMPEG_ZIP%'"
+
+:: Extraer contenido
+echo [+] Extrayendo archivos...
+powershell -Command "Expand-Archive -Path '%FFMPEG_ZIP%' -DestinationPath '%FFMPEG_DIR%'"
+del "%FFMPEG_ZIP%"
+
+:: Buscar carpeta extraída y detectar bin
+setlocal enabledelayedexpansion
+for /d %%D in ("%FFMPEG_DIR%\ffmpeg-*") do (
+    set "FFMPEG_BIN=%%D\bin"
+)
+endlocal & set "FFMPEG_BIN=%FFMPEG_BIN%"
+
+:: Verificación de carpeta bin
+if not exist "%FFMPEG_BIN%\ffmpeg.exe" (
+    echo [X] No se encontró ffmpeg.exe en la carpeta esperada.
+    echo     Verifica la descarga manualmente en: %FFMPEG_DIR%
+    pause
+    goto :EOF
+)
+
+:: Agregar a PATH para esta sesión
+set "PATH=%PATH%;%FFMPEG_BIN%"
+
+:: Agregar a PATH permanente (usuario actual)
+echo [+] Agregando FFmpeg al PATH del sistema...
+setx PATH "%PATH%;%FFMPEG_BIN%" >nul
+
+echo.
+echo [OK] FFmpeg instalado y agregado correctamente.
+goto :EOF
+
+
 
 :DETECTAR_GPU
 cls
@@ -174,6 +241,7 @@ python check_gpu.py
 del check_gpu.py
 goto :EOF
 
+
 :INSTALAR_MODOS
 cls
 color 0A
@@ -185,10 +253,10 @@ goto :EOF
 :CONFIGURAR_TOKEN
 cls
 echo -------------------------------------------------------------
-echo CONFIGURACIÓN DEL TOKEN PARA MODO PRO (Hugging Face)
+echo CONFIGURACION DEL TOKEN PARA MODO PRO (Hugging Face)
 echo -------------------------------------------------------------
 
-set /p QUIERE_TOKEN=¿Deseas ingresar tu token de Hugging Face ahora? [S/N] (Enter=No): 
+set /p QUIERE_TOKEN=Deseas ingresar tu token de Hugging Face ahora? [S/N] (Enter=No): 
 
 if /i "%QUIERE_TOKEN%"=="S" (
     set /p TOKEN=Ingresa tu token:
@@ -220,5 +288,6 @@ echo Para tutoriales, ejemplos y soporte visita:
 echo   https://jorgecoral.com/transcriptor-ia-whisper
 echo.
 echo.
+start https://jorgecoral.com/transcriptor-ia-whisper
 pause
 goto :EOF
