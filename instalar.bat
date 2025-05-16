@@ -142,13 +142,24 @@ if %errorlevel% EQU 0 (
 )
 
 echo [+] Instalando Whisper y WhisperX...
-:: Instalar Whisper desde PyPI (versión oficial estable)
 python -m pip install openai-whisper==20230918
-:: Instalar WhisperX sin dependencias para no romper torch
 python -m pip install whisperx==3.3.4 --no-deps
-:: Dependencias auxiliares
 python -m pip install pydub==0.25.1 ffmpeg-python==0.2.0 pandas==2.1.4
+python -m pip install ctranslate2==4.4.0
+python -m pip install faster-whisper==1.4.0
 
+echo [+] Instalando dependencias adicionales para modo PRO...
+python -m pip install "transformers==4.36.2" librosa numpy nltk
+python -m pip install pyannote-audio==2.1.1
+::python -m pip install git+https://github.com/pyannote/pyannote-audio.git@develop
+python -m pip install onnxruntime
+
+
+echo [+] Descargando datos de tokenizacion de nltk (punkt)...
+echo import nltk> nltk_download.py
+echo nltk.download('punkt')>> nltk_download.py
+python nltk_download.py
+del nltk_download.py
 
 echo.
 echo -------------------------------------------------------------
@@ -158,9 +169,6 @@ echo -------------------------------------------------------------
 echo -------------------------------------------------------------
 echo NOTA: Algunas advertencias pueden aparecer al instalar pandas
 echo debido a dependencias opcionales de WhisperX.
-echo.
-echo Algo como:
-echo "ERROR: pip's dependency resolver does not currently take into account all the packages that are installed."
 echo.
 echo Estas pueden ignorarse. El sistema sigue funcionando bien.
 echo -------------------------------------------------------------
@@ -172,8 +180,9 @@ if %errorlevel% neq 0 (
 )
 
 echo [OK] Dependencias instaladas correctamente.
-
 goto :EOF
+
+
 
 :INSTALAR_FFMPEG
 cls
@@ -181,12 +190,12 @@ echo =============================================================
 echo INSTALANDO FFMPEG (Requerido por Whisper para audio/video)
 echo =============================================================
 
-:: Verificar si ya está disponible
-where ffmpeg >nul 2>&1
-if %errorlevel%==0 (
-    echo [+] FFmpeg ya está disponible en el sistema.
+:: Verificar si ya está instalado localmente
+if exist "%~dp0ffmpeg\" (
+    echo [+] FFmpeg ya esta instalado localmente.
     goto :EOF
 )
+
 
 :: Definir rutas
 set "FFMPEG_DIR=%~dp0ffmpeg"
@@ -195,7 +204,8 @@ set "FFMPEG_URL=https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
 
 :: Descargar el ZIP de FFmpeg
 echo [+] Descargando FFmpeg...
-powershell -Command "Invoke-WebRequest -Uri '%FFMPEG_URL%' -OutFile '%FFMPEG_ZIP%'"
+powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri '%FFMPEG_URL%' -OutFile '%FFMPEG_ZIP%' -UseBasicParsing"
+
 
 :: Extraer contenido
 echo [+] Extrayendo archivos...
@@ -219,10 +229,6 @@ if not exist "%FFMPEG_BIN%\ffmpeg.exe" (
 
 :: Agregar a PATH para esta sesión
 set "PATH=%PATH%;%FFMPEG_BIN%"
-
-:: Agregar a PATH permanente (usuario actual)
-echo [+] Agregando FFmpeg al PATH del sistema...
-setx PATH "%PATH%;%FFMPEG_BIN%" >nul
 
 echo.
 echo [OK] FFmpeg instalado y agregado correctamente.
