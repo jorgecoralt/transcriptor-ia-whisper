@@ -16,7 +16,7 @@ Funciona completamente offline, protege tu privacidad y te permite convertir ide
 ✅ Transcribe audios o videos (.mp3, .mp4, .wav, .mkv, etc.)  
 ✅ Genera texto limpio y subtítulos `.srt`  
 ✅ Detecta silencios para estructurar el texto por bloques  
-✅ Usa diarización de hablantes (modo PRO con WhisperX) - Apagado temporalmente por cambios en versiones de plugins  
+✅ Usa diarización de hablantes (modo PRO con WhisperX) - Ofrecido separado - Futuro
 ✅ Funciona en CPU o GPU (si tienes una)  
 ✅ Te guía paso a paso y abre la web oficial para ayudarte
 
