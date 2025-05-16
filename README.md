@@ -33,7 +33,7 @@ Funciona completamente offline, protege tu privacidad y te permite convertir ide
 
 ---
 
-## 🔐 ¿Y el modo PRO?
+## 🔐 ¿Y el modo PRO? - Ofrecido separado - Futuro
 
 El modo PRO te permite detectar **quién habla** en cada parte del audio.
 
