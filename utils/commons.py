@@ -39,6 +39,32 @@ def transcribir_whisper_con_pausas(ruta_audio, modelo="small"):
     return result
 
 # --------------------------------------------------------
+# Transcripción con WhisperX + Diarización (Modo PRO)
+# --------------------------------------------------------
+def transcribir_whisperx(ruta_audio, token, modelo="large-v3"):
+    from whisperx import load_model as load_whisperx_model, DiarizationPipeline, alignment
+
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    batch_size = 16
+    compute_type = "float16" if device == "cuda" else "float32"
+
+    model, metadata = load_whisperx_model(modelo, device, compute_type=compute_type, token=token)
+
+    audio = whisper.load_audio(ruta_audio)
+    audio = whisper.pad_or_trim(audio)
+    result = model.transcribe(audio, batch_size=batch_size)
+
+    diarize_model = DiarizationPipeline(use_auth_token=token)
+    diarization = diarize_model(ruta_audio)
+
+    if diarization is None:
+        raise ValueError("No se pudo realizar la diarización. Verifica el token y el archivo de audio.")
+
+    segments = alignment.assign_speakers(result["segments"], diarization, max_overlap=0.8)
+    result["segments"] = segments
+    return result
+
+# --------------------------------------------------------
 # Formatear tiempo estilo SRT
 # --------------------------------------------------------
 def format_srt_time(seconds):
