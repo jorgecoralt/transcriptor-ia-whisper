@@ -22,7 +22,7 @@ echo INSTALADOR DE TRANSCRIPTOR IA - WHISPER
 echo ============================================================
 echo.
 echo Esta herramienta convierte audios y videos en texto usando IA local.
-echo Te acompañaremos paso a paso para dejar todo listo.
+echo Te guiare paso a paso para dejar todo listo.
 echo.
 echo Carpeta de instalacion:
 echo %~dp0
@@ -76,27 +76,61 @@ goto :EOF
 
 :INSTALAR_PYTHON
 cls
-echo Instalando Python 3.11.6...
-set "PYTHON_INSTALLER=python-3.11.6-amd64.exe"
-powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe' -OutFile '%PYTHON_INSTALLER%'"
-start /wait "" "%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
+echo =============================================================
+echo INSTALANDO PYTHON 3.11.6 (veras todo el proceso en pantalla)
+echo =============================================================
 
-if %errorlevel% neq 0 (
-	echo Error instalando Python.
-	echo.
-	echo Por favor ingresa en la página oficial de Phyton, descarga manualmente el ejecutable e instalalo en tu computador. 
-	echo En la parte inferior de la pagina donde sale FILES ubica el que dice: Windows installer (64-bit), le das clic para Descargar
-	echo Luego ubicalo en la carpeta de descargas e instala el programa dandole siguiente... siguiente...
-	start https://www.python.org/downloads/release/python-3116/
-	pause
-	exit /b
+set "PYTHON_INSTALLER=python-3.11.6-amd64.exe"
+set "PYTHON_LOG=python_install_log.txt"
+
+:: Descargar el instalador
+echo [+] Descargando Python desde python.org...
+powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3.11.6/python-3.11.6-amd64.exe' -OutFile '%PYTHON_INSTALLER%'"
+
+:: Verificar si se descargó correctamente
+if not exist "%PYTHON_INSTALLER%" (
+    echo [X] Error: el instalador no se descargo.
+    pause
+    exit /b
 )
 
-del "%PYTHON_INSTALLER%"
-echo Python instalado correctamente.
-echo Por favor reinicia el instalador para continuar.
+for %%A in ("%PYTHON_INSTALLER%") do if %%~zA lss 1024 (
+    echo [X] Error: el archivo descargado es demasiado pequeño. Puede estar corrupto.
+    pause
+    exit /b
+)
+
+:: Ejecutar instalador en modo visible y mostrar salida
+echo [+] Iniciando instalador (modo interactivo para ver errores)...
+start /wait "" "%PYTHON_INSTALLER%" /passive InstallAllUsers=1 PrependPath=1 Include_test=0
+
+:: Revisar si la instalación fue exitosa
+if %errorlevel% neq 0 (
+	echo.
+    echo [X] Error: Python no parece haberse instalado correctamente.
+    echo Puedes intentar instalarlo manualmente desde:
+    echo https://www.python.org/downloads/release/python-3116/
+	echo Se va a abrir la web para que lo hagas manualmente
+	echo Ubica en FILE el que se llama Windows installer 64-bit
+	echo Descargalo e instalalo manualmente
+	echo.
+	echo IMPORTANTE!
+	echo Asegurate de marcar la opcion de: Add pyton.exe to path
+	echo.
+	echo Deberas iniciar nuevamente este instalador
+	pause
+    start https://www.python.org/downloads/release/python-3116/
+    exit
+)
+
+echo.
+echo [OK] Python instalado correctamente.
+echo.
+echo. IMPORTANTE! 
+echo Por favor reinicia este instalador para continuar
 pause
-exit /b
+exit
+
 
 :PREPARAR_CARPETAS
 cls
@@ -195,12 +229,12 @@ echo =============================================================
 echo INSTALANDO FFMPEG (Requerido por Whisper para audio/video)
 echo =============================================================
 
-:: Verificar si ya está instalado localmente
-if exist "%~dp0ffmpeg\" (
-    echo [+] FFmpeg ya esta instalado localmente.
-    goto :EOF
+:: Verificar si ffmpeg ya está presente en alguna subcarpeta
+for /r "%~dp0ffmpeg" %%F in (ffmpeg.exe) do (
+    echo [+] FFmpeg ya esta instalado localmente en: %%F
+    set "FFMPEG_BIN=%%~dpF"
+    goto FFMPEG_ENCONTRADO
 )
-
 
 :: Definir rutas
 set "FFMPEG_DIR=%~dp0ffmpeg"
@@ -211,20 +245,19 @@ set "FFMPEG_URL=https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip
 echo [+] Descargando FFmpeg...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri '%FFMPEG_URL%' -OutFile '%FFMPEG_ZIP%' -UseBasicParsing"
 
-
 :: Extraer contenido
 echo [+] Extrayendo archivos...
 powershell -Command "Expand-Archive -Path '%FFMPEG_ZIP%' -DestinationPath '%FFMPEG_DIR%'"
 del "%FFMPEG_ZIP%"
 
-:: Buscar carpeta extraída y detectar bin
+:: Buscar carpeta extraída
 setlocal enabledelayedexpansion
 for /d %%D in ("%FFMPEG_DIR%\ffmpeg-*") do (
     set "FFMPEG_BIN=%%D\bin"
 )
 endlocal & set "FFMPEG_BIN=%FFMPEG_BIN%"
 
-:: Verificación de carpeta bin
+:: Verificar que ffmpeg.exe existe
 if not exist "%FFMPEG_BIN%\ffmpeg.exe" (
     echo [X] No se encontró ffmpeg.exe en la carpeta esperada.
     echo     Verifica la descarga manualmente en: %FFMPEG_DIR%
@@ -232,12 +265,13 @@ if not exist "%FFMPEG_BIN%\ffmpeg.exe" (
     goto :EOF
 )
 
-:: Agregar a PATH para esta sesión
+:FFMPEG_ENCONTRADO
+:: Agregar al PATH para esta sesión
 set "PATH=%PATH%;%FFMPEG_BIN%"
-
 echo.
 echo [OK] FFmpeg instalado y agregado correctamente.
 goto :EOF
+
 
 
 :DETECTAR_GPU
@@ -278,6 +312,7 @@ if "%GPU_STATUS%"=="0" (
 )
 
 goto :EOF
+
 
 
 :INSTALAR_MODOS
