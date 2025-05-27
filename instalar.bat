@@ -240,16 +240,43 @@ echo [OK] FFmpeg instalado y agregado correctamente.
 goto :EOF
 
 
-
 :DETECTAR_GPU
 cls
-echo Verificando disponibilidad de GPU...
+echo =============================================================
+echo DETECTANDO DISPONIBILIDAD Y COMPATIBILIDAD DE GPU
+echo =============================================================
 call "%~dp0venv\Scripts\activate.bat"
-echo import torch>check_gpu.py
-echo if torch.cuda.is_available(): print("GPU disponible:", torch.cuda.get_device_name(0))>>check_gpu.py
-echo else: print("No se detecto GPU. Se usara CPU.")>>check_gpu.py
+
+:: Crear script Python temporal
+> check_gpu.py echo import torch
+>> check_gpu.py echo.
+>> check_gpu.py echo if torch.cuda.is_available():
+>> check_gpu.py echo.    name = torch.cuda.get_device_name(0)
+>> check_gpu.py echo.    cap = torch.cuda.get_device_capability(0)
+>> check_gpu.py echo.    print(f"[+] GPU detectada: {name} (compute {cap[0]}.{cap[1]})")
+>> check_gpu.py echo.    if cap[0] >= 7:
+>> check_gpu.py echo.        exit(0)
+>> check_gpu.py echo.    else:
+>> check_gpu.py echo.        exit(99)
+>> check_gpu.py echo else:
+>> check_gpu.py echo.    print("[!] No se detectó GPU. Se usará CPU.")
+>> check_gpu.py echo.    exit(100)
+
 python check_gpu.py
+set "GPU_STATUS=%errorlevel%"
 del check_gpu.py
+
+:: Interpretar resultado
+if "%GPU_STATUS%"=="0" (
+    echo [OK] Tu GPU es compatible con CUDA 11.8. Se usará aceleración.
+) else if "%GPU_STATUS%"=="99" (
+    echo [!] Tu GPU fue detectada, pero NO es compatible con CUDA 11.8
+    echo     Se instalarán versiones para CPU. Todo funcionará, pero sin aceleración.
+) else if "%GPU_STATUS%"=="100" (
+    echo [!] No se encontró una GPU compatible. Se instalarán versiones para CPU.
+    echo     Todo funcionará correctamente, pero será un poco más lento.
+)
+
 goto :EOF
 
 
