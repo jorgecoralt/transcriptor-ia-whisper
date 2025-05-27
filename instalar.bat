@@ -82,14 +82,14 @@ powershell -Command "Invoke-WebRequest -Uri 'https://www.python.org/ftp/python/3
 start /wait "" "%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Include_test=0
 
 if %errorlevel% neq 0 (
-    echo Error instalando Python.
-    echo.
+	echo Error instalando Python.
+	echo.
 	echo Por favor ingresa en la página oficial de Phyton, descarga manualmente el ejecutable e instalalo en tu computador. 
 	echo En la parte inferior de la pagina donde sale FILES ubica el que dice: Windows installer (64-bit), le das clic para Descargar
 	echo Luego ubicalo en la carpeta de descargas e instala el programa dandole siguiente... siguiente...
 	start https://www.python.org/downloads/release/python-3116/
-    pause
-    exit /b
+	pause
+	exit /b
 )
 
 del "%PYTHON_INSTALLER%"
