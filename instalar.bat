@@ -1,6 +1,6 @@
 @echo off
 :: ============================================================
-:: INSTALADOR - TRANSCRIPTOR IA - WHISPER v1.1.0
+:: INSTALADOR - TRANSCRIPTOR IA - WHISPER v1.1.2
 :: Autor: Jorge Coral - https://jorgecoral.com
 :: ============================================================
 
@@ -38,11 +38,11 @@ if /i "%CONFIRMAR_INSTALACION%"=="N" (
 call :VERIFICAR_PYTHON
 call :PREPARAR_CARPETAS
 pause
+call :DETECTAR_GPU
+pause
 call :INSTALAR_DEPENDENCIAS_VENV
 pause
 call :INSTALAR_FFMPEG
-pause
-call :DETECTAR_GPU
 pause
 call :INSTALAR_MODOS
 pause
@@ -134,6 +134,7 @@ exit
 
 :PREPARAR_CARPETAS
 cls
+color 0A
 echo -------------------------------------------------------------
 echo Estamos creando el espacio donde viviran tus archivos.
 echo Esto incluye:
@@ -155,8 +156,10 @@ if not exist "%~dp0configuracion.txt" (
 )
 goto :EOF
 
+
 :INSTALAR_DEPENDENCIAS_VENV
 cls
+color 0A
 echo =============================================================
 echo INSTALANDO DEPENDENCIAS EN ENTORNO AISLADO (venv)
 echo =============================================================
@@ -172,12 +175,13 @@ echo [+] Entorno virtual activado.
 echo [+] Actualizando pip...
 python -m pip install --upgrade pip
 
-python -c "import torch" >nul 2>&1
-if %errorlevel% EQU 0 (
-    echo [+] Torch ya esta instalado. Saltando reinstalacion...
-) else (
+:: Instalar PyTorch según GPU_STATUS
+if "%GPU_STATUS%"=="0" (
     echo [+] Instalando PyTorch con soporte CUDA 11.8...
     python -m pip install --force-reinstall torch==2.0.1+cu118 torchvision==0.15.2+cu118 torchaudio==2.0.2 --index-url https://download.pytorch.org/whl/cu118
+) else (
+    echo [+] Instalando PyTorch solo para CPU...
+    python -m pip install --force-reinstall torch==2.0.1 torchvision==0.15.2 torchaudio==2.0.2
 )
 
 echo [+] Instalando Whisper y WhisperX...
@@ -192,7 +196,6 @@ python -m pip install "transformers==4.36.2" librosa numpy nltk
 python -m pip install pyannote-audio==2.1.1
 ::python -m pip install git+https://github.com/pyannote/pyannote-audio.git@develop
 python -m pip install onnxruntime
-
 
 echo [+] Descargando datos de tokenizacion de nltk (punkt)...
 echo import nltk> nltk_download.py
@@ -221,8 +224,11 @@ if %errorlevel% neq 0 (
 echo [OK] Dependencias instaladas correctamente.
 goto :EOF
 
+
+
 :INSTALAR_FFMPEG
 cls
+color 0A
 echo =============================================================
 echo INSTALANDO FFMPEG (Requerido por Whisper para audio/video)
 echo =============================================================
@@ -274,6 +280,7 @@ goto :EOF
 
 :DETECTAR_GPU
 cls
+color 0A
 echo =============================================================
 echo DETECTANDO DISPONIBILIDAD Y COMPATIBILIDAD DE GPU
 echo =============================================================
@@ -306,9 +313,6 @@ if "%GPU_STATUS%"=="0" (
 )
 
 goto :EOF
-
-
-
 
 
 
