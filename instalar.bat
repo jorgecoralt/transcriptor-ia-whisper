@@ -83,11 +83,12 @@ start /wait "" "%PYTHON_INSTALLER%" /quiet InstallAllUsers=1 PrependPath=1 Inclu
 
 if %errorlevel% neq 0 (
     echo Error instalando Python.
-    pause
+    echo.
 	echo Por favor ingresa en la página oficial de Phyton, descarga manualmente el ejecutable e instalalo en tu computador. 
 	echo En la parte inferior de la pagina donde sale FILES ubica el que dice: Windows installer (64-bit), le das clic para Descargar
 	echo Luego ubicalo en la carpeta de descargas e instala el programa dandole siguiente... siguiente...
 	start https://www.python.org/downloads/release/python-3116/
+    pause
     exit /b
 )
 
