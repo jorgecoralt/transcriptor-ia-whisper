@@ -1,6 +1,6 @@
 @echo off
 :: ============================================================
-:: INSTALADOR - TRANSCRIPTOR IA - WHISPER v1.1.2
+:: INSTALADOR - TRANSCRIPTOR IA - WHISPER v1.1.3
 :: Autor: Jorge Coral - https://jorgecoral.com
 :: ============================================================
 
@@ -287,6 +287,13 @@ echo =============================================================
 
 call "%~dp0venv\Scripts\activate.bat"
 
+:: Verificar que Torch exista
+if not exist "%~dp0venv\Lib\site-packages\torch" (
+    echo [!] Torch no se ha instalado todavia. Saltando deteccion de GPU.
+    set "GPU_STATUS=100"
+    goto :EOF
+)
+
 :: Crear el archivo Python correctamente escapado
 echo import torch > check_gpu.py
 echo. >> check_gpu.py
@@ -299,7 +306,8 @@ echo         exit(99) >> check_gpu.py
 echo else: >> check_gpu.py
 echo     exit(100) >> check_gpu.py
 
-python check_gpu.py
+:: Usar el Python del entorno virtual
+"%~dp0venv\Scripts\python.exe" check_gpu.py
 set "GPU_STATUS=%errorlevel%"
 del check_gpu.py
 
@@ -309,10 +317,11 @@ if "%GPU_STATUS%"=="0" (
     echo [!] GPU detectada, pero NO compatible con CUDA 11.8.
     echo     Se instalaran versiones para CPU.
 ) else if "%GPU_STATUS%"=="100" (
-    echo [!] No se encontro GPU. Se utilizara CPU.
+    echo [!] No se encontro GPU o Torch aun no se ha instalado. Se utilizara CPU.
 )
 
 goto :EOF
+
 
 
 
