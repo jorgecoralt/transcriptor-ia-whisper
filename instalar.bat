@@ -1,6 +1,6 @@
 @echo off
 :: ============================================================
-:: INSTALADOR - TRANSCRIPTOR IA - WHISPER v1.0.0
+:: INSTALADOR - TRANSCRIPTOR IA - WHISPER v1.1.0
 :: Autor: Jorge Coral - https://jorgecoral.com
 :: ============================================================
 
@@ -221,31 +221,29 @@ if %errorlevel% neq 0 (
 echo [OK] Dependencias instaladas correctamente.
 goto :EOF
 
-
-
 :INSTALAR_FFMPEG
 cls
 echo =============================================================
 echo INSTALANDO FFMPEG (Requerido por Whisper para audio/video)
 echo =============================================================
 
-:: Verificar si ffmpeg ya está presente en alguna subcarpeta
-for /r "%~dp0ffmpeg" %%F in (ffmpeg.exe) do (
-    echo [+] FFmpeg ya esta instalado localmente en: %%F
-    set "FFMPEG_BIN=%%~dpF"
-    goto FFMPEG_ENCONTRADO
-)
-
-:: Definir rutas
 set "FFMPEG_DIR=%~dp0ffmpeg"
 set "FFMPEG_ZIP=ffmpeg.zip"
 set "FFMPEG_URL=https://www.gyan.dev/ffmpeg/builds/ffmpeg-release-essentials.zip"
 
-:: Descargar el ZIP de FFmpeg
+:: Verificar si ya existe la carpeta ffmpeg y contiene ffmpeg.exe
+if exist "%FFMPEG_DIR%" (
+    for /r "%FFMPEG_DIR%" %%F in (ffmpeg.exe) do (
+        echo [+] FFmpeg ya esta instalado localmente en: %%F
+        set "FFMPEG_BIN=%%~dpF"
+        goto FFMPEG_ENCONTRADO
+    )
+)
+
+:: Si no existe, descargar y extraer
 echo [+] Descargando FFmpeg...
 powershell -NoProfile -ExecutionPolicy Bypass -Command "Invoke-WebRequest -Uri '%FFMPEG_URL%' -OutFile '%FFMPEG_ZIP%' -UseBasicParsing"
 
-:: Extraer contenido
 echo [+] Extrayendo archivos...
 powershell -Command "Expand-Archive -Path '%FFMPEG_ZIP%' -DestinationPath '%FFMPEG_DIR%'"
 del "%FFMPEG_ZIP%"
@@ -259,14 +257,14 @@ endlocal & set "FFMPEG_BIN=%FFMPEG_BIN%"
 
 :: Verificar que ffmpeg.exe existe
 if not exist "%FFMPEG_BIN%\ffmpeg.exe" (
-    echo [X] No se encontró ffmpeg.exe en la carpeta esperada.
+    echo [X] No se encontro ffmpeg.exe en la carpeta esperada.
     echo     Verifica la descarga manualmente en: %FFMPEG_DIR%
     pause
     goto :EOF
 )
 
 :FFMPEG_ENCONTRADO
-:: Agregar al PATH para esta sesión
+:: Agregar a PATH para esta sesión
 set "PATH=%PATH%;%FFMPEG_BIN%"
 echo.
 echo [OK] FFmpeg instalado y agregado correctamente.
@@ -279,39 +277,38 @@ cls
 echo =============================================================
 echo DETECTANDO DISPONIBILIDAD Y COMPATIBILIDAD DE GPU
 echo =============================================================
+
 call "%~dp0venv\Scripts\activate.bat"
 
-:: Crear script Python temporal
-> check_gpu.py echo import torch
->> check_gpu.py echo.
->> check_gpu.py echo if torch.cuda.is_available():
->> check_gpu.py echo.    name = torch.cuda.get_device_name(0)
->> check_gpu.py echo.    cap = torch.cuda.get_device_capability(0)
->> check_gpu.py echo.    print(f"[+] GPU detectada: {name} (compute {cap[0]}.{cap[1]})")
->> check_gpu.py echo.    if cap[0] >= 7:
->> check_gpu.py echo.        exit(0)
->> check_gpu.py echo.    else:
->> check_gpu.py echo.        exit(99)
->> check_gpu.py echo else:
->> check_gpu.py echo.    print("[!] No se detectó GPU. Se usará CPU.")
->> check_gpu.py echo.    exit(100)
+:: Crear el archivo Python correctamente escapado
+echo import torch > check_gpu.py
+echo. >> check_gpu.py
+echo if torch.cuda.is_available(): >> check_gpu.py
+echo     cap = torch.cuda.get_device_capability(0) >> check_gpu.py
+echo     if cap[0] ^>= 7: >> check_gpu.py
+echo         exit(0) >> check_gpu.py
+echo     else: >> check_gpu.py
+echo         exit(99) >> check_gpu.py
+echo else: >> check_gpu.py
+echo     exit(100) >> check_gpu.py
 
 python check_gpu.py
 set "GPU_STATUS=%errorlevel%"
 del check_gpu.py
 
-:: Interpretar resultado
 if "%GPU_STATUS%"=="0" (
-    echo [OK] Tu GPU es compatible con CUDA 11.8. Se usará aceleración.
+    echo [OK] GPU compatible con CUDA 11.8. Se usara aceleracion.
 ) else if "%GPU_STATUS%"=="99" (
-    echo [!] Tu GPU fue detectada, pero NO es compatible con CUDA 11.8
-    echo     Se instalarán versiones para CPU. Todo funcionará, pero sin aceleración.
+    echo [!] GPU detectada, pero NO compatible con CUDA 11.8.
+    echo     Se instalaran versiones para CPU.
 ) else if "%GPU_STATUS%"=="100" (
-    echo [!] No se encontró una GPU compatible. Se instalarán versiones para CPU.
-    echo     Todo funcionará correctamente, pero será un poco más lento.
+    echo [!] No se encontro GPU. Se utilizara CPU.
 )
 
 goto :EOF
+
+
+
 
 
 
