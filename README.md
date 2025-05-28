@@ -25,11 +25,7 @@ Funciona completamente offline, protege tu privacidad y te permite convertir ide
 ## 🛠 Cómo empezar
 
 1. Descarga este repositorio
-2. Ejecuta `instalar.bat` → Instala todo de forma automática (Actualización)
-
-  NOTA: Ya que ha fallado la instalación por los múltiples escenarios, por tipos distintos de dispositivos, se ha actualizado y se separa el instalador en dos. 
-  Si sabe que tiene una tarjeta gráfica NVIDIA compatible, instale el `instalar_gpu.bat`, de lo contrario use el `instalar_CPU.bat`
-
+2. Ejecuta `instalar.bat` → Instala todo de forma automática (Corregido)
 4. Coloca un archivo en `media/`
 5. Ejecuta `transcribir.bat` → Elige el modo y listo
 
