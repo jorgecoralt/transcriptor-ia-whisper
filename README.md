@@ -16,7 +16,7 @@ Funciona completamente offline, protege tu privacidad y te permite convertir ide
 ✅ Transcribe audios o videos (.mp3, .mp4, .wav, .mkv, etc.)  
 ✅ Genera texto limpio y subtítulos `.srt`  
 ✅ Detecta silencios para estructurar el texto por bloques  
-✅ Usa diarización de hablantes (modo PRO con WhisperX) - Ofrecido separado - Futuro
+✅ Usa diarización de hablantes (modo PRO con WhisperX) - Futuro
 ✅ Funciona en CPU o GPU (si tienes una)  
 ✅ Te guía paso a paso y abre la web oficial para ayudarte
 
@@ -25,7 +25,7 @@ Funciona completamente offline, protege tu privacidad y te permite convertir ide
 ## 🛠 Cómo empezar
 
 1. Descarga este repositorio
-2. Ejecuta `instalar.bat` → Instala todo de forma automática (Corregido)
+2. Ejecuta `instalar.bat` → Instala todo de forma automática (Unificado para solo CPU y GPU compatible)
 4. Coloca un archivo en `media/`
 5. Ejecuta `transcribir.bat` → Elige el modo y listo
 
